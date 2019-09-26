@@ -4,24 +4,13 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 
-from beijing import *
+from beijing import all_lines, cyclic_lines
+from construct_graph import get_graph
 #######################################
 
-def calc_centrality(city):
-    G = nx.DiGraph()
 
-    for line in all_lines:
-        G.add_node(line[0])
-        for i in range(1, len(line)):
-            j = i-1
-            G.add_node(line[i])
-            G.add_edge(line[i],line[j])
-            G.add_edge(line[j],line[i])
-    #######################################
-    for cyc_line in cyclic_lines:
-        G.add_edge(cyc_line[-1],cyc_line[0])
-        G.add_edge(cyc_line[0],cyc_line[-1])
-    UG = nx.Graph(G)
+def calc_centrality():
+    UG = get_graph(all_lines, cyclic_lines)
 
     #########################################
     dc = nx.degree_centrality(UG)
@@ -29,7 +18,12 @@ def calc_centrality(city):
     bc = nx.betweenness_centrality(UG)
     ec = nx.eigenvector_centrality_numpy(UG)
 
-    stations = UG.nodes()
+    stations = list(UG.nodes())
+
+    station_map = dict()
+
+    for i, station in enumerate(UG.nodes()):
+        station_map[station] = i
 
     features = [dc, cc, bc, ec]
     rows = len(stations)
@@ -38,14 +32,12 @@ def calc_centrality(city):
 
     for j in range(cols):
         for i in features[j].keys():
-            row_idx = stations.index(i)
+            row_idx = station_map[i]
             F[row_idx, j] = features[j][i]
 
-    features_name= ['degree', 'closeness', 'betweenness', 'eigenvector']
+    features_name = ['degree', 'closeness', 'betweenness', 'eigenvector']
     df = pd.DataFrame(F, index=stations, columns=features_name).reset_index()
-    df.to_csv(city+".centrality.csv", index=False)
-    df.to_csv(city+".all.csv", index=False)
-    ############################################
+    df.to_csv('./data/beijing.centrality.csv', index=False)
 
 
-calc_centrality('beijing')
+calc_centrality()
