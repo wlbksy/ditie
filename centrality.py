@@ -6,6 +6,7 @@ import numpy as np
 
 from beijing import all_lines, cyclic_lines
 from construct_graph import get_graph
+
 #######################################
 
 
@@ -35,9 +36,9 @@ def calc_centrality():
             row_idx = station_map[i]
             F[row_idx, j] = features[j][i]
 
-    features_name = ['degree', 'closeness', 'betweenness', 'eigenvector']
+    features_name = ["degree", "closeness", "betweenness", "eigenvector"]
     df = pd.DataFrame(F, index=stations, columns=features_name).reset_index()
-    df.to_csv('./data/beijing.centrality.csv', index=False)
+    df.to_csv("./data/beijing.centrality.csv", index=False)
 
 
 calc_centrality()
